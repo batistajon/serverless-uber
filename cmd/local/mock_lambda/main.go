@@ -13,24 +13,20 @@ func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Mock Lambda Listener running"))
-		return
 	})
 
 	mux.HandleFunc("POST /receipts", func(w http.ResponseWriter, r *http.Request) {
 		bodyBytes, err := io.ReadAll(r.Body)
 		if err != nil {
 			http.Error(w, "Failed to read request body", http.StatusBadRequest)
-			return
 		}
 		defer r.Body.Close()
 
-		// test lambda
 		localHandler := handler.NewHandler()
 
 		localHandler.HandleEndRideLocal(context.TODO(), bodyBytes)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("Lambda Handler error: %v", err), http.StatusInternalServerError)
-			return
 		}
 
 		w.WriteHeader(http.StatusOK)
