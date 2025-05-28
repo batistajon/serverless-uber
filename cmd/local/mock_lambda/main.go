@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"goLambda/internal/handler"
 	"io"
@@ -23,14 +24,21 @@ func main() {
 		defer r.Body.Close()
 
 		localHandler := handler.NewHandler()
-
 		localHandler.HandleEndRideLocal(context.TODO(), bodyBytes)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("Lambda Handler error: %v", err), http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]any{
+				"message": "internal server errorr",
+				"status":  http.StatusInternalServerError,
+			})
 		}
 
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("lambda executed successfully"))
+		log.Println("API executed successfully")
+		json.NewEncoder(w).Encode(map[string]any{
+			"message": "The work has been done successfully",
+			"status":  http.StatusOK,
+		})
 	})
 
 	log.Println("Listening to the port 8080")

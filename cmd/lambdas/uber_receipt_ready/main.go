@@ -17,7 +17,7 @@ func main() {
 func handlerLambda(ctx context.Context, event json.RawMessage) (events.LambdaFunctionURLResponse, error) {
 	coreHandler := handler.NewHandler()
 
-	res, err := coreHandler.HandleEndRideLocal(ctx, event)
+	err := coreHandler.HandleEndRideLocal(ctx, event)
 	if err != nil {
 		log.Printf("Main: Core handler failed: %v", err)
 		return events.LambdaFunctionURLResponse{
@@ -27,5 +27,8 @@ func handlerLambda(ctx context.Context, event json.RawMessage) (events.LambdaFun
 	}
 
 	log.Println("main: Core handler has worked!")
-	return res, nil
+	return events.LambdaFunctionURLResponse{
+		StatusCode: 200,
+		Body:       "Main: Lambda process has worked successfully!",
+	}, nil
 }
