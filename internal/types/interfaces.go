@@ -4,4 +4,6 @@ type Response interface{}
 
 type Table interface {
 	GetName() string
+	GetItem()
+	AddItem()
 }

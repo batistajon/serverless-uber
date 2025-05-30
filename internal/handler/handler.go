@@ -21,27 +21,36 @@ func (h *Handler) HandleEndRideLocal(ctx context.Context, event json.RawMessage)
 		return err
 	}
 
+	db, err := services.NewDynamoDBService(ctx)
+	if err != nil {
+		log.Printf("Core: Failed to authenticet with AWS DynamoDB. Error: %v", err)
+		return err
+	}
+
+	ut := types.User{
+		Name:   "Users",
+		UserId: receipt.Meta.UserID,
+	}
+	cred, err := db.GetUserCredentials(ctx, ut)
+	if err != nil {
+		log.Printf("Core: User %s not found", receipt.Meta.UserID)
+	}
+
+	log.Printf(cred.GoogleApiKey)
+
 	rt := types.ReceiptDTable{
 		Name:        "Receipts",
 		ReceiptId:   receipt.EventID,
 		ReceiptData: receipt,
 	}
 
-	// TODO
-	// open connection with dynamobd
-	db, err := services.NewDynamoDBService(ctx)
-	if err != nil {
-		log.Printf("core: failed to authenticet with aws. Error: %v", err)
-	}
-
-	if err := db.Add(ctx, rt); err != nil {
-		log.Printf("core: failed to add table. Error: %v", err)
+	if err := db.AddItem(ctx, rt); err != nil {
+		log.Printf("Core: Failed to add receipt %v in to the table Receipts. Error: %v", receipt.EventID, err)
 		return err
 	}
 
-	// defer dynamodb connection
-	// get Uber credentials from user
-	// save receipts information into dynamo receipts table
+	// get ride details from uber
+
 	// save into a google sheets spreadsheet
 
 	log.Println("core: Lambda process has worked so far")
